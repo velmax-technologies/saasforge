@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Services\CurrentOrganization;
+use App\Support\Tenant\CurrentOrganization;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Organization;
 use App\Models\User;

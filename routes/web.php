@@ -1,35 +1,39 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Services\CurrentOrganization;
+use App\Http\Middleware\ResolveOrganization;
+use App\Support\Tenant\CurrentOrganization;
 use App\Http\Controllers\OrganizationController;
-use App\Http\Middleware\SetCurrentOrganization;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
-Route::get('/debug-auth', function (\Illuminate\Http\Request $request) {
-    return response()->json([
-        'session_id' => $request->session()->getId(),
-        'authenticated' => auth()->check(),
-        'user_id' => auth()->id(),
-        'user' => auth()->user()?->only(['id', 'email']),
-        'session' => $request->session()->all(),
-        'cookies' => $request->cookies->all(),
-    ]);
-});
-
 Route::middleware([
     'auth',
-    SetCurrentOrganization::class,
+    ResolveOrganization::class,
 ])->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Dashboard
+    |--------------------------------------------------------------------------
+    */
 
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
 
-    Route::get('/tenant-test', function (CurrentOrganization $currentOrganization) {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tenant Test
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/tenant-test', function (
+        CurrentOrganization $currentOrganization
+    ) {
         $organization = $currentOrganization->get();
 
         return response()->json([
@@ -37,6 +41,13 @@ Route::middleware([
             'organization_name' => $organization->name,
         ]);
     });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Organization Switching
+    |--------------------------------------------------------------------------
+    */
 
     Route::post(
         '/organizations/{organization}/switch',
