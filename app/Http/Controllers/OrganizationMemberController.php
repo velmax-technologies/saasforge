@@ -12,7 +12,10 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-
+use App\Actions\Organization\ResendOrganizationInvitation;
+use App\Actions\Organization\RevokeOrganizationInvitation;
+use App\Models\OrganizationInvitation;
+ 
 class OrganizationMemberController extends Controller
 {
     public function index(
@@ -39,11 +42,24 @@ class OrganizationMemberController extends Controller
             ->orderBy('id')
             ->get();
 
+        $invitations = OrganizationInvitation::query()
+        ->with([
+            'role',
+            'inviter',
+        ])
+        ->where('organization_id', $organization->id)
+        ->where('status', 'pending')
+        ->orderBy('created_at', 'desc')
+        ->get();
+
         return view('organizations.members.index', [
             'organization' => $organization,
             'members' => $members,
             'roles' => $roles,
+            'invitations' => $invitations,
         ]);
+
+         
     }
 
     public function updateRole(
@@ -162,6 +178,52 @@ class OrganizationMemberController extends Controller
             'Member status updated successfully.'
         );
     }
+
+
+    public function resendInvitation(
+        Request $request,
+        Organization $organization,
+        OrganizationInvitation $invitation,
+        ResendOrganizationInvitation $resendInvitation
+    ): RedirectResponse {
+        abort_unless(
+            $invitation->organization_id === $organization->id,
+            404
+        );
+
+        $result = $resendInvitation->execute(
+            $invitation,
+            $request->user()
+        );
+
+        return back()->with([
+            'success' => 'Invitation resent successfully.',
+            'invitation_url' => $result['url'],
+        ]);
+    }
+
+    public function revokeInvitation(
+        Request $request,
+        Organization $organization,
+        OrganizationInvitation $invitation,
+        RevokeOrganizationInvitation $revokeInvitation
+    ): RedirectResponse {
+        abort_unless(
+            $invitation->organization_id === $organization->id,
+            404
+        );
+
+        $revokeInvitation->execute(
+            $invitation,
+            $request->user()
+        );
+
+        return back()->with(
+            'success',
+            'Invitation revoked successfully.'
+        );
+    }
+
 
     protected function ensureMember(
         Organization $organization,

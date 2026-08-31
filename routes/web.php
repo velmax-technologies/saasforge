@@ -1,10 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Middleware\ResolveOrganization;
 use App\Support\Tenant\CurrentOrganization;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\OrganizationMemberController;
+use App\Http\Controllers\OrganizationInvitationController;
+use App\Http\Middleware\StoreInvitationToken;
+
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -15,6 +19,7 @@ Route::middleware([
     ResolveOrganization::class,
 ])->group(function () {
 
+    
     /*
     |--------------------------------------------------------------------------
     | Dashboard
@@ -32,6 +37,14 @@ Route::middleware([
                 ->get(),
         ]);
     })->name('dashboard');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Organization
+    |--------------------------------------------------------------------------
+    */
+    Route::post( '/organizations/{organization}/members/{invitation}/resend', [OrganizationMemberController::class, 'resendInvitation'] )->name('organizations.members.invitation.resend'); 
+    Route::delete( '/organizations/{organization}/members/{invitation}', [OrganizationMemberController::class, 'revokeInvitation'] )->name('organizations.members.invitation.revoke');
 
 
     Route::get(
@@ -93,4 +106,22 @@ Route::middleware([
         '/organizations/{organization}/switch',
         [OrganizationController::class, 'switch']
     )->name('organizations.switch');
+
+
+    
 });
+
+
+Route::get(
+        '/invitations/{token}',
+        [OrganizationInvitationController::class, 'show']
+    )->name('invitations.show');
+
+    Route::post(
+        '/invitations/{token}/accept',
+        [OrganizationInvitationController::class, 'accept']
+    )
+        ->middleware('auth')
+        ->name('invitations.accept');
+
+

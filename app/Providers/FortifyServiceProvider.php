@@ -13,6 +13,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Fortify;
+use App\Http\Responses\RegisterResponse;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -21,7 +22,7 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        
     }
 
     /**
@@ -29,11 +30,30 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        
+
         Fortify::loginView(function () {
             return view('auth.login');
         });
+
+        Fortify::registerView(function (Request $request) {
+            return view('auth.register', [
+                'invitationToken' => $request->query('invitation'),
+            ]);
+        });
+
+        // Fortify::registerView(function (Request $request) {
+        //     return view('auth.register');
+        // });
         
         Fortify::createUsersUsing(CreateNewUser::class);
+
+        $this->app->singleton(
+            \Laravel\Fortify\Contracts\RegisterResponse::class,
+            RegisterResponse::class
+        );
+
         Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
