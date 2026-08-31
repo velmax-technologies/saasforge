@@ -20,8 +20,16 @@ Route::middleware([
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/dashboard', function () {
-        return view('dashboard');
+    Route::get('/dashboard', function (
+    CurrentOrganization $currentOrganization
+    ) {
+        return view('pages.dashboard', [
+            'organization' => $currentOrganization->get(),
+            'organizations' => request()->user()->organizations()
+                ->wherePivot('status', 'active')
+                ->orderBy('name')
+                ->get(),
+        ]);
     })->name('dashboard');
 
 

@@ -54,4 +54,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Membership::class, 'user_id');
     }
+
+    public function belongsToOrganization(Organization $organization): bool
+    {
+        return $this->organizations()
+            ->whereKey($organization->id)
+            ->wherePivot('status', 'active')
+            ->exists();
+    }
 }

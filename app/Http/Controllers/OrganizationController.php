@@ -14,12 +14,10 @@ class OrganizationController extends Controller
     ): RedirectResponse {
         $user = $request->user();
 
-        $hasAccess = $user->organizations()
-            ->where('organizations.id', $organization->id)
-            ->wherePivot('status', 'active')
-            ->exists();
-
-        abort_unless($hasAccess, 403);
+        abort_unless(
+            $user->belongsToOrganization($organization),
+            403
+        );
 
         $request->session()->put(
             'current_organization_id',
