@@ -3,11 +3,12 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Support\Tenant\CurrentOrganization;
+use App\Services\CurrentOrganization;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Organization;
 use App\Models\User;
-
+use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
+use App\Http\Responses\LoginResponse;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(
             CurrentOrganization::class,
             fn () => new CurrentOrganization()
+        );
+ 
+        $this->app->singleton(
+            LoginResponseContract::class,
+            LoginResponse::class
         );
     }
 
