@@ -71,4 +71,11 @@ class Organization extends Model
     {
         return $this->hasMany(Membership::class, 'organization_id');
     }
+
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(
+            OrganizationInvitation::class
+        );
+    }
 }

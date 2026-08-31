@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Organization;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\UpdateOrganizationRequest;
+use Illuminate\View\View;
 
 class OrganizationController extends Controller
 {
@@ -25,5 +27,36 @@ class OrganizationController extends Controller
         );
 
         return back();
+    }
+
+    public function settings(
+        Request $request,
+        Organization $organization
+    ): View {
+        abort_unless(
+            $request->user()->hasPermission(
+                'organization.manage',
+                $organization
+            ),
+            403
+        );
+
+        return view('organizations.settings', [
+            'organization' => $organization,
+        ]);
+    }
+
+    public function update(
+        UpdateOrganizationRequest $request,
+        Organization $organization
+    ): RedirectResponse {
+        $organization->update(
+            $request->validated()
+        );
+
+        return back()->with(
+            'success',
+            'Organization settings updated successfully.'
+        );
     }
 }

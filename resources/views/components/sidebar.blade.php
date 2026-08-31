@@ -27,6 +27,20 @@
             Dashboard
         </a>
 
+        <a
+            href="{{ route('organizations.settings', app(\App\Support\Tenant\CurrentOrganization::class)->get()) }}"
+            class="flex items-center rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+        >
+            Organization Settings
+        </a>
+
+        <a
+            href="{{ route('organizations.members.index', app(\App\Support\Tenant\CurrentOrganization::class)->get()) }}"
+            class="flex items-center rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 hover:text-gray-900"
+        >
+            Members
+        </a>
+
     </nav>
 
 </aside>

@@ -62,4 +62,12 @@ class User extends Authenticatable
             ->wherePivot('status', 'active')
             ->exists();
     }
+
+    public function sentInvitations(): HasMany
+    {
+        return $this->hasMany(
+            OrganizationInvitation::class,
+            'invited_by'
+        );
+    }
 }
